@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Home } from './home/home';
 import { AuthGuard } from './auth.guard';
+import { loadRemoteModule } from '@angular-architects/module-federation';
 
 const routes: Routes = [
   {
@@ -16,12 +17,24 @@ const routes: Routes = [
   {
     path: 'login',
     loadChildren: () =>
-      import('../../../login-app/src/app/login/login-module').then((m) => m.LoginModule),
+      loadRemoteModule({
+        type: 'module',
+        remoteEntry:
+          (window as any).__REMOTE_ENTRIES__?.loginApp ||
+          'http://localhost:4201/remoteEntry.js',
+        exposedModule: './LoginModule',
+      }).then((m) => m.LoginModule),
   },
   {
     path: 'inicio',
     loadChildren: () =>
-      import('../../../main-app/src/app/inicio/inicio-module').then((m) => m.InicioModule),
+      loadRemoteModule({
+        type: 'module',
+        remoteEntry:
+          (window as any).__REMOTE_ENTRIES__?.mainApp ||
+          'http://localhost:4202/remoteEntry.js',
+        exposedModule: './InicioModule',
+      }).then((m) => m.InicioModule),
     canActivate: [AuthGuard],
   },
 ];
