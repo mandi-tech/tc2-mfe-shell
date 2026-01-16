@@ -1,26 +1,29 @@
 name: Azure Static Web Apps CI/CD
 
 on:
+  # ✅ PR para main: roda build, NÃO faz deploy
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened, closed]
+
+  # ✅ Depois do merge: push na main → faz deploy
   push:
     branches:
-      - feature/azure-deploy
-
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - feature/azure-deploy
+      - main
 
 jobs:
   build_and_deploy_job:
+    # roda no PR (aberto/sync/reopen) e no push da main
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
+    name: Build (and Deploy on main)
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ✅ Node 20 (Angular 20 compatível)
+      # ✅ Node 20.19 (Angular 20+)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -33,22 +36,19 @@ jobs:
       - name: Build Angular app
         run: npm run build
 
-      # 🚀 Deploy APONTANDO DIRETO PARA O DIST
-      # ❌ Sem Oryx
-      # ❌ Sem build no Azure
+      # 🚀 DEPLOY SÓ NA MAIN (evita o erro no PR)
       - name: Deploy to Azure Static Web Apps
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLACK_SMOKE_0CBB79B0F }}
           action: upload
-
-          # 🔥 ISSO É O PONTO-CHAVE
           app_location: "dist/host-app"
-
           skip_app_build: true
           skip_api_build: true
 
   close_pull_request_job:
+    # (opcional) fecha ambiente de preview quando PR fecha
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
@@ -57,5 +57,6 @@ jobs:
       - name: Close Pull Request
         uses: Azure/static-web-apps-deploy@v1
         with:
+          # ⚠️ se você NÃO estiver usando preview environments, pode remover esse job inteiro.
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLACK_SMOKE_0CBB79B0F }}
           action: close
