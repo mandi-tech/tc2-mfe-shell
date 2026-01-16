@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/azure-deploy
+
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -14,29 +15,29 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ✅ Node 20 REAL (Angular 20/21 compatível)
+      # ✅ Node 20 REAL (compatível com Angular 20/21)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: '20.19.0'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      # 🔨 Build Angular (fora do Oryx)
+      # 🔨 Build Angular FORA do Oryx
       - name: Build Angular app
         run: npm run build
 
-      # 🚀 Deploy somente do dist (Oryx NÃO builda)
+      # 🚀 Deploy SOMENTE do dist (Azure NÃO builda)
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -49,8 +50,10 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
+
     steps:
       - name: Close Pull Request
         uses: Azure/static-web-apps-deploy@v1
         with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLACK_SMOKE_0CBB79B0F }}
           action: close
