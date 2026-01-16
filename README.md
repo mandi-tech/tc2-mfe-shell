@@ -4,7 +4,7 @@ O **tc2-mfe-shell** é o microfrontend **container (Shell/Host)** do projeto **T
 
 Este aplicativo é responsável por **orquestrar os microfrontends**, definir o layout global da aplicação e realizar o carregamento dinâmico dos módulos utilizando **Module Federation**.
 
----
+<br />
 
 ## 🧱 Responsabilidades
 
@@ -14,14 +14,14 @@ Este aplicativo é responsável por **orquestrar os microfrontends**, definir o 
 - Carregar os microfrontends remotamente
 - Centralizar configurações compartilhadas
 
----
+<br />
 
 ## 🧩 Microfrontends Integrados
 
 - [tc2-mfe-main](https://github.com/mandi-tech/tc2-mfe-main)
 - [tc2-mfe-auth](https://github.com/mandi-tech/tc2-mfe-auth)
 
----
+<br />
 
 ## 🚀 Development server
 
@@ -37,7 +37,7 @@ ng serve
 ```
 O app será recarregado automaticamente ao alterar os arquivos fonte.
 
----
+<br />
 
 ## 📦 Build
 
@@ -49,7 +49,7 @@ ng build
 # Os artefatos serão gerados no diretório dist/.
 ```
 
----
+<br />
 
 ## 📘 Documentação
 
@@ -57,7 +57,7 @@ A documentação completa da arquitetura e padrões do projeto está disponível
 
 ➡️ [tc2-documentation](https://github.com/mandi-tech/tc2-documentation)
 
----
+<br />
 
 ## 📄 Licença
 
