@@ -45,6 +45,13 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Inject env.js + cache busting
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          sed -i "s|%LOGIN_REMOTE%|https://zealous-grass-0c898530f.2.azurestaticapps.net/remoteEntry.js|g" dist/host-app/env.js
+          sed -i "s|%MAIN_REMOTE%|https://purple-river-02631a70f.6.azurestaticapps.net/remoteEntry.js|g" dist/host-app/env.js
+          sed -i "s|%BUILD_ID%|${GITHUB_SHA}|g" dist/host-app/index.html
+
       # DEPLOY APENAS QUANDO FOR PUSH NA MAIN
       - name: Deploy to Azure Static Web Apps
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
