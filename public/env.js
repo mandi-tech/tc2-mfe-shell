@@ -1,30 +1,47 @@
-/*
-  Runtime remote entries configuration file.
-
-  This file contains placeholders that can be replaced at container start
-  (or CI/CD) with actual remoteEntry URLs for different environments.
-
-  Example replacement (in a Linux container entrypoint):
-    sed -i "s|%LOGIN_REMOTE%|$LOGIN_REMOTE|g" /usr/share/nginx/html/env.js
-    sed -i "s|%MAIN_REMOTE%|$MAIN_REMOTE|g" /usr/share/nginx/html/env.js
-
-  It exposes a global `window.__REMOTE_ENTRIES__` used by the host.
-*/
 (function (global) {
-  // placeholders may remain unreplaced in local dev. If placeholder
-  // pattern (starts with %) is present, treat it as empty so fallback applies.
+
+  var baseUrl = '%REMOTES_BASE_URL%';
+
   var login = '%LOGIN_REMOTE%';
   var main = '%MAIN_REMOTE%';
 
-  if (typeof login === 'string' && login.indexOf('%') === 0) {
-    login = '';
-  }
-  if (typeof main === 'string' && main.indexOf('%') === 0) {
-    main = '';
+  // Helper: treat unreplaced placeholders as empty
+  function clearIfPlaceholder(value) {
+    return typeof value === 'string' && value.indexOf('%') === 0 ? '' : value;
   }
 
+  baseUrl = clearIfPlaceholder(baseUrl) || '';
+  login = clearIfPlaceholder(login) || '';
+  main = clearIfPlaceholder(main) || '';
+
+  // Helper: remove trailing slash to avoid double slashes
+  function trimTrailingSlash(url) {
+    return typeof url === 'string' ? url.replace(/\/+$/, '') : url;
+  }
+
+  baseUrl = trimTrailingSlash(baseUrl);
+
+  var injected = global.__ENV__ || {};
+  var injectedBase = injected.REMOTES_BASE_URL ? trimTrailingSlash(injected.REMOTES_BASE_URL) : '';
+  var injectedLogin = injected.LOGIN_REMOTE || '';
+  var injectedMain = injected.MAIN_REMOTE || '';
+
+  var loginRemote =
+    injectedLogin ||
+    login ||
+    (injectedBase ? injectedBase + '/loginApp/remoteEntry.js' : '') ||
+    (baseUrl ? baseUrl + '/loginApp/remoteEntry.js' : '') ||
+    'http://localhost:4201/remoteEntry.js';
+
+  var mainRemote =
+    injectedMain ||
+    main ||
+    (injectedBase ? injectedBase + '/mainApp/remoteEntry.js' : '') ||
+    (baseUrl ? baseUrl + '/mainApp/remoteEntry.js' : '') ||
+    'http://localhost:4202/remoteEntry.js';
+
   global.__REMOTE_ENTRIES__ = {
-    loginApp: login || 'http://localhost:4201/remoteEntry.js',
-    mainApp: main || 'http://localhost:4202/remoteEntry.js',
+    loginApp: loginRemote,
+    mainApp: mainRemote,
   };
 })(window);
